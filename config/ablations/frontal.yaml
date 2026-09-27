@@ -1,0 +1,9 @@
+# Structural ablation under independent validation; new results must be measured.
+extends: ../index-strict.yaml
+dataset:
+  graph_type: frontal
+  config_name: ecfnet_f_v2
+training:
+  exp_name: ecfnet_frontal_strict
+logging:
+  save_dir: ecfnet_frontal_strict

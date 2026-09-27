@@ -1,0 +1,16 @@
+# Structural ablation under independent validation; new results must be measured.
+extends: ../index-strict.yaml
+dataset:
+  features:
+  - de
+  config_name: ecfnet_de_only_v2
+model:
+  features:
+  - de
+  params:
+    ECFNet:
+      use_descriptors: false
+training:
+  exp_name: ecfnet_no_descriptors_strict
+logging:
+  save_dir: ecfnet_no_descriptors_strict

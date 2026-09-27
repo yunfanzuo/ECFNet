@@ -1,0 +1,68 @@
+# ECFNet-G architecture and paper-stated settings; legacy epoch selection.
+# For an independent test estimate, use index-strict.yaml.
+logging:
+  save_root: ./run/logs
+  save_dir: ecfnet_g_legacy
+
+dataset:
+  name: SEED
+  raw_root: ./data/raw/SEED/Preprocessed_EEG
+  save_root: ./data/processed/SEED
+  config_name: ecfnet_g_v2
+  downsample: null
+  segment: 20
+  segment_step: 4
+  sequence: 2
+  sequence_step: 0.5
+  graph_type: general
+  features: [de, wavelet]
+  freq_bands:
+    delta: [1, 4]
+    theta: [4, 8]
+    alpha: [8, 14]
+    beta: [14, 31]
+    gamma: [31, 50]
+  cog_params: {}  # Used only by legacy cog_* feature aliases.
+  session_to_load: null
+  online_transform: sub_internal  # Inherited source default; not specified in PDF.
+
+training:
+  save_root: ./run/checkpoints
+  records_root: ./run/records
+  tensorboard_root: ./run/tensorboard
+  exp_name: ecfnet_g_legacy
+  selection_protocol: legacy_test  # Test accuracy selects the epoch (source behavior).
+  validation_subject_offset: 1
+  monitor: val_acc
+  mode: max
+  save_best_n: 1
+  save_last_k: 1
+  batch_size: 64
+  max_epochs: 100
+  device: null
+  patience: 10
+  learning_rate: 0.001
+  dropout: 0.5  # Inherited source default; probability not specified in PDF.
+  loss_weight: null
+  label_smoothing: 0.05
+  optimizer: Adam
+  wd: 0.001  # Used only by AdamW; Adam uses no weight decay.
+  wd_head: 0.003
+
+model:
+  name: ECFNet
+  num_classes: 3
+  class_names: [negative, neutral, positive]
+  features: [de, wavelet]
+  params:
+    ECFNet:
+      K: 2
+      attn_heads: 4
+      head_dim: 16
+      fusion: self+cross
+      share_encoders: false
+      use_descriptors: true
+
+reproduce:
+  random_seed: 42  # Inherited source default; fold seed = base seed + subject ID.
+  deterministic: false

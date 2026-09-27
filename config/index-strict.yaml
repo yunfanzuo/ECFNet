@@ -1,0 +1,10 @@
+# Independent subject validation: 13 training + 1 validation + 1 test.
+extends: index.yaml
+logging:
+  save_dir: ecfnet_g_strict
+dataset:
+  online_transform: channel_wise  # Fit on the 13 training subjects only.
+training:
+  exp_name: ecfnet_g_strict
+  selection_protocol: validation_subject
+  validation_subject_offset: 1  # Next subject, cyclic: test 15 -> validation 1.

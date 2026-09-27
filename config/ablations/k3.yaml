@@ -1,0 +1,10 @@
+# Structural ablation under independent validation; new results must be measured.
+extends: ../index-strict.yaml
+model:
+  params:
+    ECFNet:
+      K: 3
+training:
+  exp_name: ecfnet_k3_strict
+logging:
+  save_dir: ecfnet_k3_strict

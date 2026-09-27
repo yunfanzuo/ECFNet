@@ -1,0 +1,30 @@
+[project]
+name = "ecfnet"
+version = "0.2.0"
+description = "Wavelet descriptors and band-specific regional graphs for EEG emotion recognition"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "torch==2.5.1",
+    "numpy>=1.26,<3",
+    "scipy>=1.12,<2",
+    "PyWavelets>=1.6,<2",
+    "h5py>=3.10,<4",
+    "pandas>=2.2,<4",
+    "pyarrow>=15,<26",
+    "scikit-learn>=1.4,<2",
+    "PyYAML>=6,<7",
+    "loguru>=0.7,<1",
+    "rich>=13,<16",
+    "matplotlib>=3.8,<4",
+    "seaborn>=0.13,<1",
+    "tensorboard>=2.16,<3",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+visualization = ["mne>=1.6,<2", "mne-connectivity>=0.7,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

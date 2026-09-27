@@ -1,0 +1,92 @@
+logging:
+  save_root: "./run/logs" # 日志保存根目录
+  save_dir: "default"     # 设置不同的文件夹名, 以区分不同的运行
+
+dataset:
+  name: "SEED"
+  raw_root: "./data/raw/SEED/Preprocessed_EEG"  # 原始数据根目录
+  save_root: "./data/processed/SEED"            # 预处理后数据保存根目录
+  config_name: "de_cog_general"  # 数据集预处理配置名称, 用于区分不同预处理参数
+  downsample: null         # 设置为null表示不降采样
+  segment: 20             # 样本分段窗口长度，单位秒
+  segment_step: 4         # 样本分段滑动步长，单位秒
+  sequence: 2             # 样本子序列窗口长度, 单位秒
+  sequence_step: 0.5      # 样本子序列滑动步长, 单位秒
+  graph_type: "general"  # 图结构类型, 可选 "original", "general", "frontal", "hemisphere", "TS"
+  features: ["de", "cog_b+a+w"]        # 提取特征类型, 可选 "de", "de_mov", "psd", "r_psd", "cog_b+a+w"
+  freq_bands:             # 频段划分
+    delta: [1, 4]
+    theta: [4, 8]
+    alpha: [8, 14]
+    beta: [14, 31]
+    gamma: [31, 50]
+  cog_params:          # 提取认知特征时的参数, e.g. 对于"cog_b+a+w"指提取频带比+左右不对称+WENG三个特征, 实际根据需要自由配置
+    band_ratio:
+      band1: "theta"
+      band2: "beta"
+      ch: ["AF3", "AF4", "F3", "F4"]
+    asymmetry:
+      band: "alpha"
+      l_ch: "F7"
+      r_ch: "F8"
+    weng:
+      ch: ["AF3", "AF4", "F3", "F4", "F7", "F8", "FC5", "FC6"]
+  session_to_load: null   # 设置为null表示加载所有会话, 否则指定会话编号列表
+  online_transform: "sub_internal"  # 在线数据变换, 可选 null, "sub_internal", "channel_wise", "zscore"
+
+training:
+  save_root: "./run/checkpoints"        # 模型检查点保存根目录
+  records_root: "./run/records"         # 训练记录保存根目录
+  tensorboard_root: "./run/tensorboard" # TensorBoard日志保存根目录
+  exp_name: "exp"       # 实验名称, 用于区分不同实验参数
+  monitor: "val_acc"    # 监控指标, 可选 "val_acc", "val_loss", "val_f1"
+  mode: "auto"          # 监控模式, 可选 "auto", "min", "max"
+  save_best_n: 1        # 保存表现最好的n个模型
+  save_last_k: 1        # 保存最近的k个模型
+  batch_size: 64        # 批量大小
+  max_epochs: 100       # 最大训练轮数
+  device: null          # 使用的设备, 设置为null表示自动选择
+  patience: 10          # 早停轮次耐心值
+  learning_rate: 1e-3   # 初始学习率
+  dropout: 0.5          # Dropout概率
+  loss_weight: null     # 损失函数类别权重, 设置为null表示不使用类别权重
+  label_smoothing: 0.05    # 标签平滑系数, 设置为0表示不使用标签平滑
+  optimizer: "Adam"     # 优化器类型, 可选 "Adam", "AdamW"
+  wd: 1e-3              # 权重衰减系数, 用于AdamW优化器
+  wd_head: 3e-3         # 分类头权重衰减系数, 用于AdamW优化器
+
+model:
+  name: "MyModelCogFusion"         # 模型名称, 可选 "MyModel", "MyModelCogFusion", "EmT", "DGCNN", "GCBNet_BLS", "RGNN", "TSCeption"
+  num_classes: 3          # 分类类别数
+  class_names: ["negative", "neutral", "positive"]  # 分类类别名称
+  features: ["de", "cog_b+a+w"]          # 模型使用的特征类型, 可以是单个特征或特征列表, 需与数据集预处理提取的特征对应
+  params:
+    MyModel:
+      attn_layers: 1      # 注意力层数
+      attn_heads: 4       # 注意力头数
+      conv_K: [2]      # 图卷积传播步数
+      share_encoders: false # 是否共享频带编码器，true=共享(参数量更小)，false=独立(表达能力更强)
+    MyModelCogFusion:
+      attn_heads: 4         # 注意力头数
+      conv_K: [2]        # 图卷积传播步数
+      cog_dim: 3            # 认知特征输入维度
+      fusion: "self+cross"  # 融合方式, 可选 "simple", "gate", "cross", "self", "self+cross"
+      share_encoders: false # 是否共享频带编码器，true=共享(参数量更小)，false=独立(表达能力更强)
+    EmT:
+      layers_graph: [1, 2]  # 各尺度图卷积层数
+      layers_transformer: 2 # Transformer编码器层数
+      hidden_graph: 32      # 图编码器输出维度
+      num_head: 16          # 多头注意力头数
+      dim_head: 32          # 多头注意力每个头的维度
+      sta_alpha: 0.25       # STA模块中的dropout概率系数
+      graph2token: "Linear" # 图到Token的转换方式, 可选 "Linear", "AvgPool", "MaxPool", "Flatten"
+      encoder_type: "GCN"   # 图编码器类型, 可选 "GCN", "Cheby"
+      cheby_K: 4            # ChebyNet切比雪夫多项式阶数
+    DGCNN: {}
+    GCBNet_BLS: {}
+    RGNN: {}
+    TSCeption: {}
+
+reproduce:
+  random_seed: 42         # 随机种子
+  deterministic: false    # 是否启用确定性算法, 可能会降低性能
